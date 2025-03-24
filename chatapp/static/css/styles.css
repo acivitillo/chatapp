@@ -1,0 +1,22 @@
+body {
+    font-family: sans-serif;
+    padding: 20px;
+}
+#cell {
+    border: 1px solid #ccc;
+    padding: 5px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+#chat-input {
+    width: 80%;
+}
+.user {
+    text-align: right;
+    color: blue;
+}
+.assistant {
+    text-align: left;
+    color: green;
+}
+

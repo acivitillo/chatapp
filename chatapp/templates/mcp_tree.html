@@ -1,0 +1,83 @@
+<ul class="text-sm font-mono text-gray-800 space-y-1">
+    <!-- Top-Level: Servers -->
+    <li>
+      <button
+        type="button"
+        class="collapsible-toggle w-full flex items-center justify-between px-2 py-1 text-left text-gray-700 hover:text-blue-600"
+        data-target="node-servers"
+      >
+        <span class="font-semibold">Servers</span>
+        <span class="text-gray-500 text-xs">&#9654;</span>
+      </button>
+  
+      <div id="node-servers" class="pl-3 mt-1 space-y-1 hidden">
+        <!-- Nested Group: SQL Utils -->
+        <div>
+          <button
+            type="button"
+            class="collapsible-toggle w-full flex items-center justify-between px-2 py-1 text-left text-gray-700 hover:text-blue-600"
+            data-target="node-sql-utils"
+          >
+            <span class="font-semibold">SQL Utils</span>
+            <span class="text-gray-500 text-xs">&#9654;</span>
+          </button>
+  
+          <div id="node-sql-utils" class="pl-3 mt-1 space-y-2 hidden">
+            {% for tool in tools %}
+              <div class="overflow-hidden">
+                <button
+                  class="collapsible-toggle w-full flex items-center gap-1 text-left text-sm text-blue-600 px-2 py-1 hover:bg-blue-50 overflow-hidden"
+                  data-target="tool-{{ tool.name }}"
+                >
+                  <svg id="arrow-{{ tool.name }}" class="w-4 h-4 text-gray-500 transform transition-transform duration-200 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                  <span class="truncate block max-w-full">{{ tool.name }}</span>
+                </button>
+  
+                <div id="tool-{{ tool.name }}" class="hidden border-t border-gray-200 bg-white">
+                  <div class="px-4 py-3">
+                    {% if tool.description %}
+                        <script type="text/plain" id="prompt-{{ tool.name }}">
+                            {{ tool.raw_description|safe }}
+                        </script>
+                      <div class="flex justify-end mb-2">
+                        <button
+                          type="button"
+                          class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded"
+                          onclick="insertPromptFrom('{{ tool.name }}')"
+                        >
+                          Insert Prompt
+                        </button>
+                      </div>
+                      <div class="markdown-desc text-sm leading-relaxed space-y-2 break-words text-gray-800">
+                        {{ tool.description|safe }}
+                      </div>
+                    {% endif %}
+  
+                    {% if tool.parameters %}
+                      <p class="text-xs text-gray-500 uppercase tracking-wider mt-3 mb-2">Parameters</p>
+                      <ul class="space-y-1 pl-3 border-l border-gray-200">
+                        {% for param_name, param in tool.parameters.items %}
+                          <li>
+                            <span class="text-gray-800">{{ param_name }}</span>
+                            <span class="text-gray-400 text-xs">: {{ param.type }}</span>
+                            {% if param.title %}
+                              <span class="text-gray-500 italic text-xs">— {{ param.title }}</span>
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <p class="text-gray-400 italic mt-2">No parameters</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+  
