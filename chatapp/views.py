@@ -26,22 +26,6 @@ async def send_message(request):
     await client.connect()
     try:
         response_message = await client.process_query(user_input)
-        
-        # Process code and determine language if present
-        code = response_message.get("code", "")
-        code_language = 'text'
-        
-        if code:
-            # Simple language detection based on file extension or content
-            if code.startswith('```python') or code.endswith('.py'):
-                code_language = 'python'
-            elif code.startswith('```html') or code.startswith('<'):
-                code_language = 'markup'
-            
-            # Clean up code content by removing markdown code blocks if present
-            if code.startswith('```'):
-                lines = code.split('\n')
-                code = '\n'.join(lines[1:-1] if lines[-1] == '```' else lines[1:])
     finally:
         await client.close()
         
@@ -49,8 +33,8 @@ async def send_message(request):
         'message': response_message["text"],
         'tool_name': response_message["tool_name"],
         'cell_id': cell_id,
-        'code': code,
-        'code_language': code_language
+        'code': response_message["code"],
+        'code_language': response_message["code_language"],
     })
 
 @csrf_exempt

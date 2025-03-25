@@ -88,23 +88,33 @@ class MCPClient:
                 messages.append({"role": "assistant", "tool_calls": [call.model_dump()]})
                 messages.append({"role": "tool", "tool_call_id": call.id, "content": result.content})
 
-                # followup = self.openai.chat.completions.create(
-                #     model="gpt-4-0125-preview",
-                #     messages=messages
-                # )s
-                #final_text.append(followup.choices[0].message.content)
                 text = result.content[0].text
                 response_message["tool_name"] = tool_name
         else:
             text = message.content
             response_message["tool_name"] = "no tool used"
 
+        # Check for code blocks in the text
         if re.search(r'<[a-z][\s\S]*>', text, re.IGNORECASE):
             response_message["text"] = text
             response_message["code"] = text
+            response_message["code_language"] = "html"
+        elif re.search(r'```sql\n[\s\S]*?```', text) or re.search(r'SELECT\s+.*?FROM', text, re.IGNORECASE):
+            response_message["text"] = text
+            response_message["code"] = text
+            response_message["code_language"] = "sql"
+        elif (re.search(r'```python\n[\s\S]*?```', text) or 
+              re.search(r'def\s+\w+\s*\(', text) or 
+              re.search(r'class\s+\w+\s*\(', text) or 
+              re.search(r'import\s+\w+', text) or 
+              re.search(r'from\s+\w+\s+import', text)):
+            response_message["text"] = text
+            response_message["code"] = text
+            response_message["code_language"] = "python"
         else:
-            response_message["text"] = markdown.markdown(text)
-
+            response_message["text"] = text
+            response_message["code"] = ""
+            response_message["code_language"] = "text"
         return response_message
 
     async def close(self):

@@ -5,10 +5,13 @@
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
     <!-- Add Prism.js for code highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-dracula.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     <!-- Add our compiled Tailwind CSS -->
     {% load static %}
     <link href="{% static 'css/output.css' %}" rel="stylesheet" />
@@ -152,6 +155,35 @@
           // Trigger input event to auto-resize
           activeTextarea.dispatchEvent(new Event("input"));
         }
+      }
+    }
+
+    function switchTab(cellId, tabName) {
+      // Get all tab buttons and contents for this cell
+      const outTab = document.getElementById(`tab-out-${cellId}`);
+      const codeTab = document.getElementById(`tab-code-${cellId}`);
+      const outContent = document.getElementById(`tab-content-out-${cellId}`);
+      const codeContent = document.getElementById(`tab-content-code-${cellId}`);
+      
+      // Reset all tabs
+      outTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+      codeTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+      outTab.classList.add('text-gray-500');
+      codeTab.classList.add('text-gray-500');
+      
+      // Hide all content
+      outContent.classList.add('hidden');
+      codeContent.classList.add('hidden');
+      
+      // Activate selected tab
+      if (tabName === 'out') {
+        outTab.classList.remove('text-gray-500');
+        outTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+        outContent.classList.remove('hidden');
+      } else {
+        codeTab.classList.remove('text-gray-500');
+        codeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+        codeContent.classList.remove('hidden');
       }
     }
   </script>

@@ -34,6 +34,16 @@
             +
           </button>
 
+          <!-- Remove Cell Button -->
+          <button
+            type="button"
+            class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 shadow"
+            title="Remove Cell"
+            onclick="removeNotebookEntry('{{ cell_id }}')"
+          >
+            -
+          </button>
+
           <!-- Send Button -->
           <button
             id="send-button"
@@ -52,32 +62,20 @@
 </div>
 
 <script>
-  function switchTab(cellId, tabName) {
-    // Get all tab buttons and contents for this cell
-    const outTab = document.getElementById(`tab-out-${cellId}`);
-    const codeTab = document.getElementById(`tab-code-${cellId}`);
-    const outContent = document.getElementById(`tab-content-out-${cellId}`);
-    const codeContent = document.getElementById(`tab-content-code-${cellId}`);
+  function removeNotebookEntry(cellId) {
+    // Count all notebook entries
+    const notebookEntries = document.querySelectorAll('.notebook-entry');
     
-    // Reset all tabs
-    outTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
-    codeTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
-    outTab.classList.add('text-gray-500');
-    codeTab.classList.add('text-gray-500');
-    
-    // Hide all content
-    outContent.classList.add('hidden');
-    codeContent.classList.add('hidden');
-    
-    // Activate selected tab
-    if (tabName === 'out') {
-      outTab.classList.remove('text-gray-500');
-      outTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
-      outContent.classList.remove('hidden');
-    } else {
-      codeTab.classList.remove('text-gray-500');
-      codeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
-      codeContent.classList.remove('hidden');
+    // If there's only one entry left, don't allow removal
+    if (notebookEntries.length <= 1) {
+      return;
+    }
+
+    // Find the notebook entry containing this cell
+    const notebookEntry = document.querySelector(`#input-${cellId}`).closest('.notebook-entry');
+    if (notebookEntry) {
+      // Remove the entire notebook entry (both input and output cells)
+      notebookEntry.remove();
     }
   }
 </script>

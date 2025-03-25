@@ -31,7 +31,7 @@
     </div>
     <!-- Code Tab Content -->
     <div id="tab-content-code-{{ cell_id }}" class="hidden space-y-2 overflow-auto" style="max-height: var(--tab-height);">
-      <pre class="rounded bg-gray-800 !mt-0"><code class="language-{{ code_language|default:'bash' }}">{{ code|default:'No code available' }}</code></pre>
+      <pre class="rounded !mt-0 line-numbers !bg-[#1a1a1a] !p-4"><code class="language-{{ code_language|default:'bash' }} !text-gray-100">{{ code|default:'No code available' }}</code></pre>
     </div>
   </div>
 </div>
@@ -43,6 +43,9 @@
 
   // Highlight code when switching to code tab
   document.getElementById('tab-code-{{ cell_id }}').addEventListener('click', function() {
-    Prism.highlightAll();
+    const codeElement = document.querySelector(`#tab-content-code-{{ cell_id }} code`);
+    if (codeElement) {
+      Prism.highlightElement(codeElement);
+    }
   });
 </script>
