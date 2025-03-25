@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Node modules and Tailwind CSS
+node_modules
+package-lock.json
+chatapp/static/css/output.css

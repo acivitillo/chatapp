@@ -65,3 +65,94 @@ Run the django server
 ```bash
 python manage.py runserver
 ```
+
+# Chat REPL
+
+A chat application that allows you to interact with an AI assistant using natural language. The assistant can help you with various tasks, including writing and executing code, analyzing data, and answering questions.
+
+## Features
+
+- Natural language interaction with AI
+- Code execution and visualization
+- Markdown support with syntax highlighting
+- Interactive data visualization
+- Tool selection and management
+- Real-time response streaming
+
+## Prerequisites
+
+- Python 3.8 or higher
+- Node.js 16 or higher
+- `uv` package manager (recommended for faster dependency installation)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd chatapp
+```
+
+2. Install Python dependencies using `uv`:
+```bash
+uv pip install -e .
+```
+
+3. Install Node.js dependencies:
+```bash
+npm install
+```
+
+## Running the Demo
+
+1. Start the Django server:
+```bash
+python manage.py runserver
+```
+
+2. Open your browser and navigate to `http://localhost:8000`
+
+3. Start chatting with the AI assistant!
+
+### Running Tailwind
+
+The application uses Tailwind CSS for styling. To compile the CSS:
+
+1. Start the Tailwind CSS build process:
+```bash
+npm run build
+```
+
+This will:
+- Watch your HTML files for changes
+- Compile the CSS from `static/css/input.css` to `static/css/output.css`
+- Automatically rebuild when you make changes
+
+The build process will continue running until you stop it (Ctrl+C). You can leave it running while developing.
+
+## Project Structure
+
+```
+chatapp/
+├── chatapp/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── config.py
+│   ├── mcp/
+│   │   ├── __init__.py
+│   │   └── client.py
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── input.css
+│   │   │   └── output.css
+│   │   └── js/
+│   │       └── main.js
+│   └── templates/
+│       ├── index.html
+│       ├── input_cell.html
+│       ├── output_cell.html
+│       └── sidebar.html
+├── pyproject.toml
+├── package.json
+└── tailwind.config.js
+```
