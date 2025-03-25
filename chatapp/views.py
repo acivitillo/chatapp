@@ -1,5 +1,6 @@
 import markdown
 import textwrap
+import uuid
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -17,6 +18,7 @@ def index(request):
 @csrf_exempt
 async def send_message(request):
     user_input = request.POST.get("message", "").strip()
+    cell_id = request.POST.get("cell_id")
     if not user_input:
         return HttpResponse("Empty input", status=400)
 
@@ -24,16 +26,38 @@ async def send_message(request):
     await client.connect()
     try:
         response_message = await client.process_query(user_input)
+        
+        # Process code and determine language if present
+        code = response_message.get("code", "")
+        code_language = 'text'
+        
+        if code:
+            # Simple language detection based on file extension or content
+            if code.startswith('```python') or code.endswith('.py'):
+                code_language = 'python'
+            elif code.startswith('```html') or code.startswith('<'):
+                code_language = 'markup'
+            
+            # Clean up code content by removing markdown code blocks if present
+            if code.startswith('```'):
+                lines = code.split('\n')
+                code = '\n'.join(lines[1:-1] if lines[-1] == '```' else lines[1:])
     finally:
         await client.close()
+        
     return render(request, "output_cell.html", {
         'message': response_message["text"],
         'tool_name': response_message["tool_name"],
+        'cell_id': cell_id,
+        'code': code,
+        'code_language': code_language
     })
 
 @csrf_exempt
 async def new_input_cell(request):
-    return render(request, "input_cell.html")
+    return render(request, "input_cell.html", {
+        'cell_id': str(uuid.uuid4())
+    })
 
 @csrf_exempt
 async def mcp_tree_view(request):

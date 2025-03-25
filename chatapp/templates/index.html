@@ -5,6 +5,11 @@
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <!-- Add Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
   </head>
   <body class="bg-gray-50 font-sans">
     <div class="flex min-h-screen">
@@ -37,46 +42,49 @@
             </svg>
           </button>
         </div>
-        <div id="notebook" class="w-full bg-white shadow rounded p-6">
+        <div id="notebook" class="w-full space-y-6">
           {% include "input_cell.html" %}
-          <div id="chat-window" class="space-y-2">
-            <!-- Messages go here -->
-          </div>
         </div>
       </div>
     </div>
 
     <script>
-      const sendBtn = document.getElementById("send-button");
-      const progressSpinner = document.getElementById("progress-spinner");
-      const chatInput = document.getElementById("message-input");
-
       let isLoading = false;
 
-      if (chatInput) {
-        chatInput.addEventListener("input", () => {
-          chatInput.style.height = "auto";
-          chatInput.style.height = chatInput.scrollHeight + "px";
-        });
-
-        chatInput.addEventListener("keydown", function (e) {
-          if (e.key === "Enter" && e.ctrlKey) {
-            // Ctrl + Enter → submit
-            e.preventDefault();
-            if (!isLoading) {
-              sendBtn.click();
-            }
-          }
-        });
+      // Utility function to get the active cell ID
+      function getActiveCellId(element) {
+        const cell = element.closest('.input-cell');
+        return cell ? cell.id : null;
       }
+
+      // Handle textarea auto-resize and Ctrl+Enter for all cells
+      document.addEventListener('input', (e) => {
+        if (e.target.matches('textarea[name="message"]')) {
+          e.target.style.height = "auto";
+          e.target.style.height = e.target.scrollHeight + "px";
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.target.matches('textarea[name="message"]') && e.key === "Enter" && e.ctrlKey) {
+          e.preventDefault();
+          if (!isLoading) {
+            const cellId = getActiveCellId(e.target);
+            const cell = document.getElementById(cellId);
+            const form = cell.querySelector('#chat-form');
+            const sendBtn = form.querySelector('button[type="submit"]');
+            if (sendBtn) sendBtn.click();
+          }
+        }
+      });
 
       document.addEventListener("htmx:configRequest", function (e) {
         isLoading = true;
 
         const form = e.detail.elt;
-        const spinner = form
-          .closest(".input-cell")
-          ?.querySelector(".progress-spinner");
+        const cellId = getActiveCellId(form);
+        const cell = document.getElementById(cellId);
+        const spinner = cell?.querySelector(".progress-spinner");
         const sendBtn = form.querySelector("button[type='submit']");
 
         if (sendBtn) {
@@ -89,9 +97,9 @@
 
       document.addEventListener("htmx:afterRequest", function (e) {
         const form = e.detail.elt;
-        const spinner = form
-          .closest(".input-cell")
-          ?.querySelector(".progress-spinner");
+        const cellId = getActiveCellId(form);
+        const cell = document.getElementById(cellId);
+        const spinner = cell?.querySelector(".progress-spinner");
         const sendBtn = form.querySelector("button[type='submit']");
 
         if (sendBtn) {
@@ -128,13 +136,20 @@
       });
 
       function insertPromptFrom(toolName) {
-        const input = document.querySelector('textarea[name="message"]');
-        const rawTextElement = document.getElementById(`prompt-${toolName}`);
-        if (input && rawTextElement) {
-          input.value = rawTextElement.textContent.trim();
-          input.focus();
-          // Trigger input event to auto-resize
-          input.dispatchEvent(new Event("input"));
+        // Find the active (last focused) textarea or fall back to the last textarea in the document
+        const activeTextarea = document.activeElement.matches('textarea[name="message"]') 
+          ? document.activeElement 
+          : document.querySelector('#notebook textarea[name="message"]:last-of-type');
+          
+        if (activeTextarea) {
+          const cellId = getActiveCellId(activeTextarea);
+          const rawTextElement = document.getElementById(`prompt-${toolName}`);
+          if (rawTextElement) {
+            activeTextarea.value = rawTextElement.textContent.trim();
+            activeTextarea.focus();
+            // Trigger input event to auto-resize
+            activeTextarea.dispatchEvent(new Event("input"));
+          }
         }
       }
     </script>

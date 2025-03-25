@@ -100,8 +100,8 @@ class MCPClient:
             response_message["tool_name"] = "no tool used"
 
         if re.search(r'<[a-z][\s\S]*>', text, re.IGNORECASE):
-            print(1)
             response_message["text"] = text
+            response_message["code"] = text
         else:
             response_message["text"] = markdown.markdown(text)
 
