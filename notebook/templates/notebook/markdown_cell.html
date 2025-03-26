@@ -1,0 +1,86 @@
+<!-- HTMX -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<div class="notebook-entry bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+    
+  <div class="input-cell relative" id="input-{{ cell_id }}">
+      <form
+        id="chat-form"
+        hx-post="/notebook/send/"
+        hx-target="#output-{{ cell_id }}"
+        hx-swap="outerHTML"
+        class="relative mb-4 mt-2"
+      >
+        <input type="hidden" name="cell_id" value="{{ cell_id }}">
+        <div class="relative">
+          <textarea
+            name="message"
+            id="message-input"
+            rows="5"
+            placeholder="Type a message..."
+            class="w-full pr-20 border px-3 py-2 rounded shadow-sm resize-none overflow-hidden leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-300"
+          ></textarea>
+  
+          <!-- Buttons Row -->
+          <div class="absolute bottom-2 right-2 flex items-center gap-2">
+            <div
+              class="progress-spinner hidden animate-spin h-6 w-6 rounded-full border-2 border-blue-500 border-t-transparent"
+            ></div>
+            <!-- New Cell Button -->
+            <button
+              type="button"
+              name = "new-cell"
+              class="w-8 h-8 rounded-full bg-blue-800 text-white flex items-center justify-center hover:bg-blue-700 shadow"
+              title="Insert New Cell"
+              hx-get="/notebook/new-cell/"
+              hx-target=".notebook-entry:last-of-type"
+              hx-swap="afterend"
+            >
+              +
+            </button>
+  
+            <!-- Remove Cell Button -->
+            <button
+              type="button"
+              class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 shadow"
+              title="Remove Cell"
+              onclick="removeNotebookEntry('{{ cell_id }}')"
+            >
+              -
+            </button>
+  
+            <!-- Send Button -->
+            <button
+              id="send-button"
+              type="submit"
+              class="w-8 h-8 rounded-full bg-blue-800 text-white flex items-center justify-center hover:bg-blue-700 shadow"
+              title="Send (Ctrl+Enter)"
+            >
+              ↑
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- Empty output cell placeholder -->
+    <div id="output-{{ cell_id }}" class="hidden"></div>
+  </div>
+  
+  <script>
+    function removeNotebookEntry(cellId) {
+      // Count all notebook entries
+      const notebookEntries = document.querySelectorAll('.notebook-entry');
+      
+      // If there's only one entry left, don't allow removal
+      if (notebookEntries.length <= 1) {
+        return;
+      }
+  
+      // Find the notebook entry containing this cell
+      const notebookEntry = document.querySelector(`#input-${cellId}`).closest('.notebook-entry');
+      if (notebookEntry) {
+        // Remove the entire notebook entry (both input and output cells)
+        notebookEntry.remove();
+      }
+    }
+  </script>

@@ -16,14 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from notebook import urls as notebook_urls
 
 from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", views.index, name="index"),
-    path("send/", views.send_message, name="send"),
-    path("sidebar/mcp-tree/", views.mcp_tree_view, name="mcp_tree"),
-    path("new-cell/", views.new_input_cell, name="new_cell"),
-    #path('', include('chatapp.urls')),
+    path('', views.index, name='index'),
+    path('notebook/', include((notebook_urls, 'notebook'))),
+
 ]

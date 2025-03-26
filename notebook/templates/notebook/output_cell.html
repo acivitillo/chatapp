@@ -1,0 +1,51 @@
+<div class="output-cell bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex space-x-2">
+      <button
+        onclick="switchTab('{{ cell_id }}', 'out')"
+        class="px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-800"
+      >
+        Out
+      </button>
+      <button
+        onclick="switchTab('{{ cell_id }}', 'code')"
+        class="px-3 py-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700"
+      >
+        Code
+      </button>
+    </div>
+  </div>
+
+  <!-- Output Content -->
+  <div id="out-content-{{ cell_id }}" class="prose max-w-none">
+    {{ message|safe }}
+  </div>
+
+  <!-- Code Content -->
+  <div id="code-content-{{ cell_id }}" class="hidden">
+    <pre><code class="language-markdown">{{ message }}</code></pre>
+  </div>
+</div>
+
+<script>
+  // Set initial height for the "Out" tab
+  const outContent = document.getElementById('out-content-{{ cell_id }}');
+  const codeContent = document.getElementById('code-content-{{ cell_id }}');
+  
+  // Parse markdown content
+  const markdownContent = outContent.innerHTML;
+  outContent.innerHTML = marked.parse(markdownContent);
+  
+  // Highlight code when switching to "Code" tab
+  const codeBlock = codeContent.querySelector('code');
+  if (codeBlock) {
+    Prism.highlightElement(codeBlock);
+  }
+  
+  // Highlight inline code blocks in the "Out" tab
+  outContent.querySelectorAll('code').forEach((block) => {
+    if (!block.parentElement.matches('pre')) {
+      Prism.highlightElement(block);
+    }
+  });
+</script> 

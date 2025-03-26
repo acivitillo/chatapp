@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <div id="notebook" class="w-full space-y-6">
+      {% include "notebook/markdown_cell.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script> 
+    let isLoading = false;
+
+    // Utility function to get the active cell ID
+    function getActiveCellId(element) {
+      const cell = element.closest('.input-cell');
+      return cell ? cell.id : null;
+    }
+
+    // Handle textarea auto-resize and Ctrl+Enter for all cells
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('textarea[name="message"]')) {
+        e.target.style.height = "auto";
+        e.target.style.height = e.target.scrollHeight + "px";
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.matches('textarea[name="message"]') && e.key === "Enter" && e.ctrlKey) {
+        e.preventDefault();
+        if (!isLoading) {
+          const cellId = getActiveCellId(e.target);
+          const cell = document.getElementById(cellId);
+          const form = cell.querySelector('#chat-form');
+          const sendBtn = form.querySelector('button[type="submit"]');
+          if (sendBtn) sendBtn.click();
+        }
+      }
+    });
+
+    document.addEventListener("htmx:configRequest", function (e) {
+      isLoading = true;
+
+      const form = e.detail.elt;
+      const cellId = getActiveCellId(form);
+      const cell = document.getElementById(cellId);
+      const spinner = cell?.querySelector(".progress-spinner");
+      const sendBtn = form.querySelector("button[type='submit']");
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.classList.add("opacity-50", "cursor-not-allowed");
+      }
+
+      if (spinner) spinner.classList.remove("hidden");
+    });
+
+    document.addEventListener("htmx:afterRequest", function (e) {
+      const form = e.detail.elt;
+      const cellId = getActiveCellId(form);
+      const cell = document.getElementById(cellId);
+      const spinner = cell?.querySelector(".progress-spinner");
+      const sendBtn = form.querySelector("button[type='submit']");
+
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+
+      if (spinner) spinner.classList.add("hidden");
+
+      isLoading = false;
+    });
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("hidden");
+    }
+
+    // Collapsible tool nodes
+    document.addEventListener("click", function (e) {
+      if (e.target.closest(".collapsible-toggle")) {
+        const toggleBtn = e.target.closest(".collapsible-toggle");
+        const targetId = toggleBtn.getAttribute("data-target");
+        const content = document.getElementById(targetId);
+        const arrow = toggleBtn.querySelector("svg");
+
+        if (content) {
+          content.classList.toggle("hidden");
+        }
+
+        if (arrow) {
+          arrow.classList.toggle("rotate-90");
+        }
+      }
+    });
+
+    function insertPromptFrom(toolName) {
+      // Find the active (last focused) textarea or fall back to the last textarea in the document
+      const activeTextarea = document.activeElement.matches('textarea[name="message"]') 
+        ? document.activeElement 
+        : document.querySelector('#notebook textarea[name="message"]:last-of-type');
+        
+      if (activeTextarea) {
+        const cellId = getActiveCellId(activeTextarea);
+        const rawTextElement = document.getElementById(`prompt-${toolName}`);
+        if (rawTextElement) {
+          activeTextarea.value = rawTextElement.textContent.trim();
+          activeTextarea.focus();
+          // Trigger input event to auto-resize
+          activeTextarea.dispatchEvent(new Event("input"));
+        }
+      }
+    }
+
+    function switchTab(cellId, tabName) {
+      // Get all tab buttons and contents for this cell
+      const outTab = document.getElementById(`tab-out-${cellId}`);
+      const codeTab = document.getElementById(`tab-code-${cellId}`);
+      const outContent = document.getElementById(`tab-content-out-${cellId}`);
+      const codeContent = document.getElementById(`tab-content-code-${cellId}`);
+      
+      // Reset all tabs
+      outTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+      codeTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+      outTab.classList.add('text-gray-500');
+      codeTab.classList.add('text-gray-500');
+      
+      // Hide all content
+      outContent.classList.add('hidden');
+      codeContent.classList.add('hidden');
+      
+      // Activate selected tab
+      if (tabName === 'out') {
+        outTab.classList.remove('text-gray-500');
+        outTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+        outContent.classList.remove('hidden');
+      } else {
+        codeTab.classList.remove('text-gray-500');
+        codeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-500', 'bg-white');
+        codeContent.classList.remove('hidden');
+      }
+    }
+  </script>
+
+{% endblock %} 

@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notebook</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Typography -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {},
+            },
+            plugins: [
+                function({ addBase, theme }) {
+                    addBase({
+                        'h1': { fontSize: theme('fontSize.2xl'), fontWeight: theme('fontWeight.bold') },
+                        'h2': { fontSize: theme('fontSize.xl'), fontWeight: theme('fontWeight.bold') },
+                        'h3': { fontSize: theme('fontSize.lg'), fontWeight: theme('fontWeight.bold') },
+                        'p': { marginBottom: theme('spacing.4') },
+                        'ul': { listStyleType: 'disc', paddingLeft: theme('spacing.6') },
+                        'ol': { listStyleType: 'decimal', paddingLeft: theme('spacing.6') },
+                        'li': { marginBottom: theme('spacing.2') },
+                        'blockquote': { 
+                            borderLeftWidth: '4px',
+                            borderLeftColor: theme('colors.gray.300'),
+                            fontStyle: 'italic',
+                            paddingLeft: theme('spacing.4'),
+                            marginLeft: '0',
+                            marginRight: '0'
+                        },
+                        'code': { 
+                            backgroundColor: theme('colors.gray.100'),
+                            padding: '0.2em 0.4em',
+                            borderRadius: '0.25rem',
+                            fontSize: '0.875em'
+                        },
+                        'pre': {
+                            backgroundColor: theme('colors.gray.100'),
+                            padding: theme('spacing.4'),
+                            borderRadius: theme('borderRadius.lg'),
+                            overflowX: 'auto'
+                        }
+                    })
+                }
+            ]
+        }
+    </script>
+    
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    
+    <!-- Marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/input.css' %}">
+</head>
+<body class="bg-gray-50">
+    {% block content %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        function switchTab(cellId, tab) {
+            const outputCell = document.querySelector(`#output-${cellId}`);
+            if (!outputCell) return;
+
+            const outContent = outputCell.querySelector(`#out-content-${cellId}`);
+            const codeContent = outputCell.querySelector(`#code-content-${cellId}`);
+            const outTab = outputCell.querySelector(`button[onclick="switchTab('${cellId}', 'out')"]`);
+            const codeTab = outputCell.querySelector(`button[onclick="switchTab('${cellId}', 'code')"]`);
+
+            if (tab === 'out') {
+                outContent.classList.remove('hidden');
+                codeContent.classList.add('hidden');
+                outTab.classList.add('bg-blue-100', 'text-blue-800');
+                outTab.classList.remove('text-gray-500', 'hover:text-gray-700');
+                codeTab.classList.remove('bg-blue-100', 'text-blue-800');
+                codeTab.classList.add('text-gray-500', 'hover:text-gray-700');
+            } else {
+                outContent.classList.add('hidden');
+                codeContent.classList.remove('hidden');
+                codeTab.classList.add('bg-blue-100', 'text-blue-800');
+                codeTab.classList.remove('text-gray-500', 'hover:text-gray-700');
+                outTab.classList.remove('bg-blue-100', 'text-blue-800');
+                outTab.classList.add('text-gray-500', 'hover:text-gray-700');
+            }
+        }
+    </script>
+</body>
+</html> 
