@@ -3,6 +3,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import uuid
 
+import markdown
+import textwrap
+
 from mcpclient.client import MCPClient
 
 def index(request):
@@ -35,3 +38,24 @@ async def send(request):
         'code': response_message["code"],
         'code_language': response_message["code_language"],
     })
+
+@csrf_exempt
+async def mcp_tree(request):
+    # Replace this with your actual MCP connection state
+    client = MCPClient()
+    async with MCPClient() as client:
+        tools = await client.tools()
+    #print("TOOOLS", tools)
+    #This only supports 1 server, needs improvement
+    tool_stanzas = []
+    for tool in tools:
+        name = tool["function"]["name"]
+        raw_description = tool["function"]["description"]
+        description = textwrap.dedent(raw_description).strip()
+        description = markdown.markdown(description)
+        print(description)
+        parameters = tool["function"]["parameters"]["properties"]
+        d = {"name": name, "parameters": parameters
+             , "description":description, "raw_description": raw_description}
+        tool_stanzas.append(d)
+    return render(request, "notebook/mcp_tree.html", {"tools": tool_stanzas})

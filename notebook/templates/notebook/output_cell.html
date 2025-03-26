@@ -1,51 +1,51 @@
-<div class="output-cell bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
-  <div class="flex items-center justify-between mb-4">
-    <div class="flex space-x-2">
-      <button
-        onclick="switchTab('{{ cell_id }}', 'out')"
-        class="px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-800"
-      >
-        Out
-      </button>
-      <button
-        onclick="switchTab('{{ cell_id }}', 'code')"
-        class="px-3 py-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700"
-      >
-        Code
-      </button>
+<div id="output-{{ cell_id }}" class="output-cell border border-gray-200 rounded-lg bg-gray-50">
+  <!-- Tab Navigation -->
+  <div class="flex border-b border-gray-200">
+    <button 
+      onclick="switchTab('{{ cell_id }}', 'out')"
+      id="tab-out-{{ cell_id }}"
+      class="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-500 bg-white rounded-t-lg active"
+      aria-current="page"
+    >
+      Out
+    </button>
+    <button 
+      onclick="switchTab('{{ cell_id }}', 'code')"
+      id="tab-code-{{ cell_id }}"
+      class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg"
+    >
+      Code
+    </button>
+  </div>
+  
+  <!-- Tab Content -->
+  <div class="p-4">
+    <!-- Out Tab Content -->
+    <div id="tab-content-out-{{ cell_id }}" class="space-y-2">
+      {% if tool_name %}
+      <h5 class="text-sm font-medium text-gray-700 bg-blue-100 px-3 py-1 rounded">
+        Tool used: {{ tool_name }}
+      </h5>
+      {% endif %}
+      <div class="text-gray-800 text-sm min-h-[7rem]">{{ message | safe }}</div>
     </div>
-  </div>
-
-  <!-- Output Content -->
-  <div id="out-content-{{ cell_id }}" class="prose max-w-none">
-    {{ message|safe }}
-  </div>
-
-  <!-- Code Content -->
-  <div id="code-content-{{ cell_id }}" class="hidden">
-    <pre><code class="language-markdown">{{ message }}</code></pre>
+    <!-- Code Tab Content -->
+    <div id="tab-content-code-{{ cell_id }}" class="hidden space-y-2 overflow-auto" style="max-height: var(--tab-height);">
+      <pre class="rounded !mt-0 line-numbers !bg-[#1a1a1a] !p-4"><code class="language-{{ code_language|default:'bash' }} !text-gray-100">{{ code|default:'No code available' }}</code></pre>
+    </div>
   </div>
 </div>
 
 <script>
-  // Set initial height for the "Out" tab
-  const outContent = document.getElementById('out-content-{{ cell_id }}');
-  const codeContent = document.getElementById('code-content-{{ cell_id }}');
-  
-  // Parse markdown content
-  const markdownContent = outContent.innerHTML;
-  outContent.innerHTML = marked.parse(markdownContent);
-  
-  // Highlight code when switching to "Code" tab
-  const codeBlock = codeContent.querySelector('code');
-  if (codeBlock) {
-    Prism.highlightElement(codeBlock);
-  }
-  
-  // Highlight inline code blocks in the "Out" tab
-  outContent.querySelectorAll('code').forEach((block) => {
-    if (!block.parentElement.matches('pre')) {
-      Prism.highlightElement(block);
+  // Set initial height based on Out tab
+  const outTab = document.getElementById('tab-content-out-{{ cell_id }}');
+  document.documentElement.style.setProperty('--tab-height', outTab.offsetHeight + 'px');
+
+  // Highlight code when switching to code tab
+  document.getElementById('tab-code-{{ cell_id }}').addEventListener('click', function() {
+    const codeElement = document.querySelector(`#tab-content-code-{{ cell_id }} code`);
+    if (codeElement) {
+      Prism.highlightElement(codeElement);
     }
   });
-</script> 
+</script>
