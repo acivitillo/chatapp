@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="grid grid-cols-2 gap-4 p-6">
+                <!-- Toast UI Editor Container -->
+                <div id="editor">{{ initial_content}}</div>
+                <!-- SQL Code Block Container -->
+                <div class="w-full">
+                    <pre class="h-[600px] overflow-auto rounded-lg bg-gray-900 font-mono text-sm"><code class="language-sql line-numbers" id="sqlPreview">{{ sql_content }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast UI Editor Dependencies -->
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Decode the content and replace escaped newlines
+        const content = `{{ initial_content|escapejs }}`
+            .replace(/\\n/g, '\n')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\');
+
+        const editor = new toastui.Editor({
+            el: document.querySelector('#editor'),
+            height: '600px',
+            initialValue: content,
+            previewStyle: 'tab',
+            initialEditType: 'markdown',
+            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+            toolbarItems: [
+                ['heading', 'bold', 'italic', 'strike'],
+                ['hr', 'quote'],
+                ['ul', 'ol', 'task'],
+                ['table', 'image', 'link'],
+                ['code', 'codeblock']
+            ],
+            events: {
+                change: function() {
+                    const sqlContent = editor.getMarkdown();
+                    const sqlPreview = document.getElementById('sqlPreview');
+                    sqlPreview.textContent = sqlContent;
+                    Prism.highlightElement(sqlPreview);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

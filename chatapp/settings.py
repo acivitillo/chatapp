@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'chatapp',
     'notebook',
+    'model',
 ]
 
 MIDDLEWARE = [

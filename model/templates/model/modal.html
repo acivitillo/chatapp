@@ -1,0 +1,55 @@
+<!-- Right Pane -->
+<div id="assistModal" class="w-1/3 bg-white border-l border-gray-200">
+    <div class="p-5 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">SQL Assistant</h3>
+            <button type="submit" id="runAssist" form="assistForm"
+                    class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Run
+            </button>
+        </div>
+        <form id="assistForm" method="POST" data-url="{% url 'model:receive_assist_prompt' %}" class="flex-1 flex flex-col">
+            {% csrf_token %}
+            <div class="flex-1">
+                <textarea name="message" id="assistInput" 
+                          class="w-full h-full px-3 py-2 text-gray-700 border focus:outline-none focus:border-blue-500 resize-none"
+                          placeholder="Describe what you want to do with SQL..."></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal functionality
+        const modal = document.getElementById('assistModal');
+        const assistForm = document.getElementById('assistForm');
+        const assistInput = document.getElementById('assistInput');
+
+        // Handle form submission
+        assistForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = assistInput.value;
+            
+            // Get current cursor position from editor (defined in index.html)
+            const pos = editor.getCursor();
+            
+            // Store cursor position in a data attribute
+            assistForm.setAttribute('data-cursor-line', pos.line);
+            assistForm.setAttribute('data-cursor-ch', pos.ch);
+            
+            // Submit the form
+            const formData = new FormData(assistForm);
+            fetch(assistForm.getAttribute('data-url'), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(text => {
+                // Insert the response text at cursor position
+                editor.replaceRange(text, pos);
+                assistInput.value = '';
+            });
+        });
+    });
+</script>

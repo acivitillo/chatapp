@@ -2,6 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import uuid
+import os
+import sqlite3
+import pandas as pd
+from django.conf import settings
 
 import markdown
 import textwrap
@@ -59,3 +63,4 @@ async def mcp_tree(request):
              , "description":description, "raw_description": raw_description}
         tool_stanzas.append(d)
     return render(request, "notebook/mcp_tree.html", {"tools": tool_stanzas})
+

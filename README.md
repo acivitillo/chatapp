@@ -38,27 +38,7 @@ Note: a tool is a Python function with a `mcp.tool` decorator.
 
 # Running the demo
 
-Update the configs:
 
-- `SQLITE_PATH` inside `chatapp/chatapp/mcp/sql.py`
-- All other configs in `chatapp/config.py`
-
-Create Environment Variables:
-
-- `OPENAI_KEY` storing the API Key of Open AI
-
-Create a Python virtual environment and install all Python dependencies:
-
-```bash
-cd chatapp
-uv sync
-```
-
-Activate the Python virtual environment:
-
-```bash
-.venv\Scripts\activate
-```
 
 Run the django server
 
@@ -93,9 +73,28 @@ git clone <repository-url>
 cd chatapp
 ```
 
-2. Install Python dependencies using `uv`:
+2. Configs and Virtual Env:
+
+Update the configs:
+
+- `SQLITE_PATH` inside `chatapp/chatapp/mcp/sql.py`
+- All other configs in `chatapp/config.py`
+
+Create Environment Variables:
+
+- `OPENAI_KEY` storing the API Key of Open AI
+
+Create a Python virtual environment and install all Python dependencies:
+
 ```bash
-uv pip install -e .
+cd chatapp
+uv sync
+```
+
+Activate the Python virtual environment:
+
+```bash
+.venv\Scripts\activate
 ```
 
 3. Install Node.js dependencies:

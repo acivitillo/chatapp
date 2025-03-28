@@ -1,0 +1,41 @@
+<div class="overflow-x-auto scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                {% for column in df.columns %}
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for _, row in df.iterrows %}
+                <tr class="hover:bg-gray-50">
+                    {% for value in row %}
+                        <td class="px-3 py-1.5 whitespace-nowrap text-sm text-gray-900">{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Custom scrollbar styling */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 8px;  /* Height of horizontal scrollbar */
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>

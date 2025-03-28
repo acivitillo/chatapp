@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'notebook'
+
 urlpatterns = [
     path('', views.index, name='notebook_index'),
     path('new-cell/', views.new_cell, name='new_cell'),

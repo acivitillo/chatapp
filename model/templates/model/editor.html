@@ -1,0 +1,79 @@
+<!-- SQL Editor -->
+<div class="flex-1 bg-white overflow-hidden border-r border-l border-gray-200">
+    <div class="p-4 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">SQL Editor</h3>
+            <div class="flex space-x-2">
+                <button id="runSql" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        hx-post="{% url 'model:run_sql' %}"
+                        hx-target="#sqlResults"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-indicator="#loading">
+                    Run SQL
+                </button>
+                <button id="openModal" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    Assist
+                </button>
+            </div>
+        </div>
+        <div class="flex-1">
+            <textarea id="editor">{{ initial_content }}</textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+            mode: 'text/x-sql',
+            theme: 'monokai',
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            extraKeys: {
+                "Ctrl-Space": "autocomplete",
+                "Ctrl-S": function(cm) {
+                    console.log('Save triggered');
+                }
+            },
+            hint: CodeMirror.hint.sql,
+            hintOptions: {
+                completeSingle: false,
+                tables: {
+                    users: ["name", "score", "birthDate"],
+                    orders: ["id", "user_id", "amount", "status"],
+                    products: ["id", "name", "price", "stock"]
+                }
+            }
+        });
+
+        editor.setValue(`{{ initial_content|escapejs }}`);
+
+        // Add SQL content to HTMX request
+        document.getElementById('runSql').addEventListener('click', function(e) {
+            const sqlContent = editor.getValue();
+            const formData = new FormData();
+            formData.append('sql', sqlContent);
+            
+            fetch(this.getAttribute('hx-post'), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('sqlResults').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('sqlResults').innerHTML = `<div class="text-red-500">Error: ${error.message}</div>`;
+            });
+        });
+
+        // Make editor globally available for modal.html
+        window.editor = editor;
+    });
+</script>
