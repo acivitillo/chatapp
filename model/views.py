@@ -8,6 +8,9 @@ import sqlite3
 import pandas as pd
 from io import StringIO
 
+# hook for the generate_sql module
+from ai.modules.sql import generate_sql
+
 # Create your views here.
 
 def index(request):
@@ -44,10 +47,6 @@ def run_sql(request):
             except json.JSONDecodeError:
                 # If not JSON, try form data
                 sql = request.POST.get('sql', '')
-            
-            # Connect to SQLite database
-            conn = sqlite3.connect('db.sqlite3')
-            
             # Execute query and get results as DataFrame
             db_path = os.path.join(settings.BASE_DIR, 'chinook.sqlite')
             conn = sqlite3.connect(db_path)
@@ -64,6 +63,6 @@ def receive_assist_prompt(request):
         prompt = "--"
         prompt += request.POST.get('message', '')
         # TODO: Implement the logic to generate SQL using AI
-        sql = "SELECT * FROM Invoice;"
+        sql = generate_sql(prompt) # this is a hook for the generate_sql module
         response = prompt + "\n" + sql
         return HttpResponse(response)
