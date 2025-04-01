@@ -1,0 +1,15 @@
+<div class="mb-4 p-3 bg-gray-50 rounded-lg text-sm">
+    {% if "group" in message|lower %}
+        <p class="mb-3">It seems you're trying to group by. 
+        Would you like to use our pivot tool?</p>
+        <a href="{% url 'model:show_modal' %}"
+           class="inline-block mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+           hx-get="{% url 'model:show_modal' %}"
+           hx-target="#modalContainer"
+           hx-trigger="click">
+            Open Modal
+        </a>
+    {% else %}
+        <p>your question was: {{ message }}</p>
+    {% endif %}
+</div>

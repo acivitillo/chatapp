@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100" x-data="pivotData">
+    <div class="flex h-screen">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 h-full">
+            <div class="flex h-full">
+                <!-- Column 1: Column List -->
+                <div class="w-1/6 bg-white border-r border-gray-200 p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Available Fields</h3>
+                    <div class="space-y-2">
+                        {% for column in df.columns %}
+                        <div class="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700 cursor-move hover:bg-gray-100"
+                             draggable="true"
+                             @dragstart="dragStart($event, '{{ column }}')"
+                             @dragend="dragEnd">
+                            {{ column }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Column 2: Pivot Fields -->
+                <div class="w-1/6 bg-white border-r border-gray-200 p-4 flex flex-col">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pivot Fields</h3>
+                    
+                    <!-- Rows Pane -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Rows</h4>
+                        <div class="border border-gray-200 rounded-lg p-2 min-h-[100px] bg-gray-50 transition-colors duration-200"
+                             :class="{ 'bg-blue-50 border-blue-300': dragOver === 'rows' }"
+                             @dragover.prevent
+                             @dragenter.prevent="dragOver = 'rows'"
+                             @dragleave.prevent="dragOver = false"
+                             @drop.prevent="handleDrop($event, 'rows')">
+                            <template x-for="field in rows" :key="field">
+                                <div class="px-2 py-1 bg-white rounded text-xs text-gray-700 mb-1 flex justify-between items-center">
+                                    <span x-text="field"></span>
+                                    <button @click="removeField('rows', field)" class="text-gray-400 hover:text-gray-600">×</button>
+                                </div>
+                            </template>
+                            <div x-show="rows.length === 0" class="text-xs text-gray-500 text-center py-2">Drag fields here</div>
+                        </div>
+                    </div>
+
+                    <!-- Columns Pane -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Columns</h4>
+                        <div class="border border-gray-200 rounded-lg p-2 min-h-[100px] bg-gray-50 transition-colors duration-200"
+                             :class="{ 'bg-blue-50 border-blue-300': dragOver === 'columns' }"
+                             @dragover.prevent
+                             @dragenter.prevent="dragOver = 'columns'"
+                             @dragleave.prevent="dragOver = false"
+                             @drop.prevent="handleDrop($event, 'columns')">
+                            <template x-for="field in columns" :key="field">
+                                <div class="px-2 py-1 bg-white rounded text-xs text-gray-700 mb-1 flex justify-between items-center">
+                                    <span x-text="field"></span>
+                                    <button @click="removeField('columns', field)" class="text-gray-400 hover:text-gray-600">×</button>
+                                </div>
+                            </template>
+                            <div x-show="columns.length === 0" class="text-xs text-gray-500 text-center py-2">Drag fields here</div>
+                        </div>
+                    </div>
+
+                    <!-- Values Pane -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Values</h4>
+                        <div class="border border-gray-200 rounded-lg p-2 min-h-[100px] bg-gray-50 transition-colors duration-200"
+                             :class="{ 'bg-blue-50 border-blue-300': dragOver === 'values' }"
+                             @dragover.prevent
+                             @dragenter.prevent="dragOver = 'values'"
+                             @dragleave.prevent="dragOver = false"
+                             @drop.prevent="handleDrop($event, 'values')">
+                            <template x-for="field in values" :key="field">
+                                <div class="px-2 py-1 bg-white rounded text-xs text-gray-700 mb-1 flex justify-between items-center">
+                                    <span x-text="field"></span>
+                                    <button @click="removeField('values', field)" class="text-gray-400 hover:text-gray-600">×</button>
+                                </div>
+                            </template>
+                            <div x-show="values.length === 0" class="text-xs text-gray-500 text-center py-2">Drag fields here</div>
+                        </div>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <form hx-post="{% url 'model:receive_pivot_fields' %}" 
+                          hx-trigger="submit"
+                          hx-target="#pivotContent"
+                          hx-swap="innerHTML"
+                          class="mt-auto"
+                        {% csrf_token %}
+                        <input type="hidden" name="rows" :value="JSON.stringify(rows)">
+                        <input type="hidden" name="columns" :value="JSON.stringify(columns)">
+                        <input type="hidden" name="values" :value="JSON.stringify(values)">
+
+                        <button type="submit" 
+                                class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Refresh
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Column 3: Right side with table and SQL tabs -->
+                <div class="w-3/6 flex-1 flex flex-col">                    <!-- Tab Content -->
+                    <div class="flex-1 overflow-auto">
+                        <!-- Table Tab -->
+                        <div x-show="activeTab === 'table'" class="h-full">
+                            <div id="pivotContent">
+                                {% include 'pivot/refreshed_table.html' %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+function pivotData() {
+    return {
+        rows: [],
+        columns: [], 
+        values: [],
+        sql: '',
+        dragOver: false,
+        activeTab: 'table',
+        draggedItem: null,
+        dragSource: null,
+
+        dragStart(event, field) {
+            event.dataTransfer.setData('text/plain', field);
+            event.dataTransfer.effectAllowed = 'move';
+            this.draggedItem = field;
+            this.dragSource = 'available';
+        },
+
+        dragEnd(event) {
+            event.preventDefault();
+            this.draggedItem = null;
+            this.dragSource = null;
+        },
+
+        handleDrop(event, target) {
+            event.preventDefault();
+            const field = event.dataTransfer.getData('text/plain');
+            
+            // Remove from other arrays if it exists
+            this.rows = this.rows.filter(f => f !== field);
+            this.columns = this.columns.filter(f => f !== field);
+            this.values = this.values.filter(f => f !== field);
+            
+            // Add to target array
+            if (target === 'rows') {
+                this.rows.push(field);
+            } else if (target === 'columns') {
+                this.columns.push(field);
+            } else if (target === 'values') {
+                this.values.push(field);
+            }
+            
+            this.dragOver = false;
+        },
+
+        removeField(target, field) {
+            if (target === 'rows') {
+                this.rows = this.rows.filter(f => f !== field);
+            } else if (target === 'columns') {
+                this.columns = this.columns.filter(f => f !== field);
+            } else if (target === 'values') {
+                this.values = this.values.filter(f => f !== field);
+            }
+        },
+    }
+}
+</script>
+{% endblock %}

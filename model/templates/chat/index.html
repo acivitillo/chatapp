@@ -1,0 +1,59 @@
+<!-- Right Pane -->
+<div class="w-96 bg-white border-l border-gray-200 flex flex-col">
+    <div class="p-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Chat</h2>
+    </div>
+    
+    <!-- Chat responses will be appended here -->
+    <div id="chatResponse" class="flex-1 p-4 overflow-y-auto">
+        <!-- Existing responses will appear here -->
+    </div>
+
+    <!-- Chat input form -->
+    <form class="p-4 border-t border-gray-200"
+          hx-post="{% url 'model:receive_assist_prompt' %}"
+          hx-target="#chatResponse"
+          hx-swap="beforeend">
+        <div class="relative">
+            <textarea name="message" 
+                      x-model="message"
+                      class="w-full px-3 py-2 text-gray-700 border focus:outline-none focus:border-blue-500 resize-none h-24"
+                      placeholder="Describe what you want to do with SQL..."></textarea>
+            <button type="submit"
+                    class="absolute bottom-2 right-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-1">
+                <span>Send</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+            </button>
+        </div>
+    </form>
+</div>
+<div id="modalContainer">   </div>
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('chat', () => ({
+        message: '',
+
+        async sendMessage(e) {
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const pos = Alpine.store('editor').getCursor();
+                
+                const response = await fetch(form.getAttribute('data-url'), {
+                    method: 'POST',
+                    body: formData
+                });
+                const text = await response.text();
+                
+                Alpine.store('editor').replaceRange(text, pos);
+                this.message = '';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    }))
+})
+</script>

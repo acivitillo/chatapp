@@ -1,0 +1,23 @@
+<div x-data="{ open: true }" x-init="$nextTick(() => open = true)">
+    <div class="fixed inset-0 w-full h-full bg-white z-50 overflow-auto"
+         x-show="open"
+         @keydown.escape.window="open = false">
+        <div class="w-full h-full p-6"
+             @click.stop>
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold">Modal Title</h2>
+                <button @click="open = false; $dispatch('close-modal')"
+                        hx-post="{% url 'model:close_modal' %}"
+                        hx-target="#chatResponse"
+                        hx-swap="beforeend"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                    Close
+                </button>
+            </div>
+            <div class="modal-content">
+                <!-- Your modal content here -->
+                {% include 'pivot/index.html' %}
+            </div>
+        </div>
+    </div>
+</div>

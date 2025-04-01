@@ -1,0 +1,37 @@
+{% block content %}
+<div class="flex flex-col h-full" x-data="{ activeTab: 'table' }">
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200">
+        <button @click="activeTab = 'table'"
+                :class="{ 'border-b-2 border-blue-500': activeTab === 'table' }"
+                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+            Table
+        </button>
+        <button @click="activeTab = 'sql'"
+                :class="{ 'border-b-2 border-blue-500': activeTab === 'sql' }"
+                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+            SQL
+        </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="flex-1">
+        <div x-show="activeTab === 'table'" class="h-full relative">
+            <div id="pivotContent">
+                {% include 'utils/table.html' %}
+            </div>
+
+        </div>
+        <div id="sqlPivotCode" x-show="activeTab === 'sql'" class="p-4">
+            <div class="prose">
+                <p class="text-sm text-gray-600 mb-2">SQL Query:</p>
+                <pre class="bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                    <code id="sqlSnippet" class="text-sm text-gray-800">
+                        {{sql}}
+                    </code>
+                </pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

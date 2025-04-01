@@ -1,0 +1,36 @@
+<script>
+let lastClickTime = 0;  // Track last click time
+</script>
+
+<div class="mb-4 p-3 bg-gray-50 rounded-lg text-sm" 
+     x-data="{ 
+         addToEditor() {
+             const now = Date.now();
+             if (now - lastClickTime < 200) return;  // Prevent clicks within 200ms
+             lastClickTime = now;
+             
+             console.log('Adding SQL to editor');
+             const sql = this.$refs.sqlCode.textContent.trim();
+             try {
+                 const pos = Alpine.store('editor').getCursor();
+                 Alpine.store('editor').replaceRange(sql, pos);
+             } catch (error) {
+                 console.error('Error:', error);
+             }
+         }
+     }">
+    <p class="mb-2">Generated SQL Query:</p>
+    <pre class="bg-gray-100 p-2 rounded overflow-x-auto">
+        <code class="text-sm text-gray-800" x-ref="sqlCode">{{ sql }}</code>
+    </pre>
+    <div class="flex justify-end mt-2">
+        <button type="button"
+                @click.once="addToEditor()"
+                class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-1">
+            <span>Add</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+    </div>
+</div>

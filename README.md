@@ -111,7 +111,10 @@ python manage.py runserver
 
 2. Open your browser and navigate to `http://localhost:8000`
 
-3. Start chatting with the AI assistant!
+3. You can now:
+
+- Chat with an AI assistant -> use the Notebook app
+- Develop SQL queries with an AI assistant (very rough state) -> use the model app
 
 ### Running Tailwind
 
